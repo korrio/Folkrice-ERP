@@ -1,6 +1,6 @@
-<? if(isset($_GET['pid'])) { 
-	$pid = $_GET['pid'];
-	?>
+<?php if (isset($_GET['pid'])) {
+    $pid = $_GET['pid'];
+    ?>
 <!DOCTYPE html>
 <html lang="en" class="no-js">
 	<head>
@@ -69,7 +69,8 @@
 		$('.container').hide();
 		$("body").css("background","#fff");
 		$(function(){
-			var p = <? echo "'".$pid."'"; ?>;
+			var p = <?php echo "'".$pid."'";
+    ?>;
 			$.ajax({
                 url:'../../ajax/_partner_detail.php',
                 type: 'GET',
@@ -128,4 +129,5 @@
 		</script>
 	</body>
 </html>
-<? } ?>
+<?php 
+} ?>

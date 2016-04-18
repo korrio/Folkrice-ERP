@@ -1,10 +1,10 @@
-<?
-	header('Content-Type: text/html; charset=utf-8');
-	include("_db_mysql.php");
+<?php
+    header('Content-Type: text/html; charset=utf-8');
+    include '_db_mysql.php';
 // $timezone = "set timezone TO 'GMT'";
 // 		retrieve($timezone);
 
-	$job_no = $_GET['job_no'];
+    $job_no = $_GET['job_no'];
 // 	$q = "select id,name from crm_lead where name like  lpad({$job_no}::text, 5, '0')";
 // 	$a = retrieve($q);
 // 	//echo $q;
@@ -17,14 +17,14 @@
 // 	//echo $q2;
 // 	$a2 = retrieve($q2);
 
-	//{"id":"276748",
-	//"body_text":"Changed Stage to: \u0e32\u0e19",
-	//"res_id":"22059","create_date":"26\/11\/15 02:41",
-	//"user":"\u0e2a\u0e32\u0e27"}
+    //{"id":"276748",
+    //"body_text":"Changed Stage to: \u0e32\u0e19",
+    //"res_id":"22059","create_date":"26\/11\/15 02:41",
+    //"user":"\u0e2a\u0e32\u0e27"}
 
-	//,{"id":"276749","body_text":null,"res_id":"22059","create_date":"26\/11\/15 02:41","user":"\u0e2a\u0e32\u0e27"}
+    //,{"id":"276749","body_text":null,"res_id":"22059","create_date":"26\/11\/15 02:41","user":"\u0e2a\u0e32\u0e27"}
 
-	$sql = "SELECT o.id as id,  
+    $sql = "SELECT o.id as id,  
 	p.name_w as user,
 	c.name as body_text,
 	i.order_id as order_id,
@@ -38,7 +38,6 @@
 	AND i.product_id = p.id 
 	AND p.category_id = c.id";
 
-	$result = retrieve($sql);
+    $result = retrieve($sql);
 
-	echo $_GET['callback'].'('.json_encode($result).')';	
-?>
+    echo $_GET['callback'].'('.json_encode($result).')';

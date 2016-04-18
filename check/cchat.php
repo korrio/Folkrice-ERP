@@ -7,7 +7,11 @@
 <script src="../js/sprintf-0.7-beta1.js"></script>
 <script>
 $(function(){
-	var job_no = <?  if(isset($_GET['job_no'])){echo ""+$_GET['job_no'];} else { echo "''";}; ?>;
+	var job_no = <?php  if (isset($_GET['job_no'])) {
+     echo '' + $_GET['job_no'];
+ } else {
+     echo "''";
+ } ?>;
 	if(job_no != "") {
 		var myjob = "" + sprintf( "%05d", job_no );
 		$(".job_no").html("" + job_no);
