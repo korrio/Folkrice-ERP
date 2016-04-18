@@ -221,7 +221,7 @@ var p = "";
 		var tax_id = $("[name='tax_id']").val(); 
 		checkTax(tax_id);
 	});
-	//var j = <? echo "'" . $_GET['job_no'] . "'"; ?>;
+	//var j = <?php echo "'".$_GET['job_no']."'"; ?>;
 	/* default call */
 
 	call_holders();

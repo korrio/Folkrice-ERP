@@ -15,168 +15,163 @@
 */
 
 /*
-	
-	Filename	: export.xls.class.php
-	Description	: A small light weight PHP class to allow the creation of simple xls excel spreadsheets from array data.
-	Version 	: 1.01
-	Author 		: Leenix
-	Website		: http://www.leenix.co.uk
+
+    Filename	: export.xls.class.php
+    Description	: A small light weight PHP class to allow the creation of simple xls excel spreadsheets from array data.
+    Version 	: 1.01
+    Author 		: Leenix
+    Website		: http://www.leenix.co.uk
 */
 
 /*
-	Change Log
-		V1 - First Release
- 		1.01 - Fixed UTF8 Issue
+    Change Log
+        V1 - First Release
+        1.01 - Fixed UTF8 Issue
  */
 
-class ExportXLS {
+class ExportXLS
+{
+    private $filename;    //Filename which the excel file will be returned as
+    private $headerArray;    // Array which contains header information
+    private $bodyArray;    // Array with the spreadsheet body
+    private $rowNo = 0;    // Keep track of the row numbers
 
-	private $filename;	//Filename which the excel file will be returned as
-	private $headerArray;	// Array which contains header information
-	private $bodyArray;	// Array with the spreadsheet body
-	private $rowNo = 0;	// Keep track of the row numbers
+    //Class constructor
+    public function ExportXLS($filename)
+    {
+        $this->filename = $filename;
+    }
 
+    /*
+    -------------------------
+    START OF PUBLIC FUNCTIONS
+    -------------------------
+    */
 
-	#Class constructor
-	function ExportXLS($filename) { 
-		$this->filename = $filename;
-	}
+    public function addHeader($header)
+    {
+        //Accepts an array or var which gets added to the top of the spreadsheet as a header.
 
+        if (is_array($header)) {
+            $this->headerArray[] = $header;
+        } else {
+            $this->headerArray[][0] = $header;
+        }
+    }
 
-	/*
-	-------------------------
-	START OF PUBLIC FUNCTIONS
-	-------------------------
-	*/
+    public function addRow($row)
+    {
+        //Accepts an array or var which gets added to the spreadsheet body
 
-	public function addHeader($header) {
-	#Accepts an array or var which gets added to the top of the spreadsheet as a header.
+        if (is_array($row)) {
+            //check for multi dim array
+            if (is_array($row[0])) {
+                foreach ($row as $key => $array) {
+                    $this->bodyArray[] = $array;
+                }
+            } else {
+                $this->bodyArray[] = $row;
+            }
+        } else {
+            $this->bodyArray[][0] = $row;
+        }
+    }
 
-		if(is_array($header)) {
-			$this->headerArray[] = $header;
-		}
-		else
-		{
-			$this->headerArray[][0] = $header;
-		}
-	}
+    public function returnSheet()
+    {
+        // returns the spreadsheet as a variable
 
-	public function addRow($row) {
-	#Accepts an array or var which gets added to the spreadsheet body
+        //build the xls
+        return $this->buildXLS();
+    }
 
-		if(is_array($row)) {
-			#check for multi dim array
-			if(is_array($row[0])) {
-				foreach($row as $key=>$array) {
-					$this->bodyArray[] = $array;
-				}
-			}
-			else
-			{
-				$this->bodyArray[] = $row;
-			}			
-		}
-		else
-		{
-			$this->bodyArray[][0] = $row;
-		}
-	
-	}
-	
-	public function returnSheet() {
-	# returns the spreadsheet as a variable
+    public function sendFile()
+    {
 
-		#build the xls
-		return $this->buildXLS();
-	}
+        //build the xls
+        $xls = $this->buildXLS();
 
-	public function sendFile() {
+        //send headers
+        header('Pragma: public');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header('Content-Type: application/force-download');
+        header('Content-Type: application/octet-stream');
+        header('Content-Type: application/download');
+        header('Content-Disposition: attachment;filename='.$this->filename);
+        header('Content-Transfer-Encoding: binary ');
 
-		#build the xls
-		$xls = $this->buildXLS();
+        echo $xls;
 
-		#send headers
-		header("Pragma: public");
-		header("Expires: 0");
-		header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
-		header("Content-Type: application/force-download");
-		header("Content-Type: application/octet-stream");
-		header("Content-Type: application/download");
-		header("Content-Disposition: attachment;filename=".$this->filename);
-		header("Content-Transfer-Encoding: binary ");
+        exit;
+    }
 
-		echo $xls;
+    /*
+    --------------------------
+    START OF PRIVATE FUNCTIONS
+    --------------------------
+    */
 
-		exit;
-	}
+    private function buildXLS()
+    {
+        // build and return the xls
 
+        //Excel BOF
+        $xls = pack('ssssss', 0x809, 0x8, 0x0, 0x10, 0x0, 0x0);
 
-	/*
-	--------------------------
-	START OF PRIVATE FUNCTIONS
-	--------------------------
-	*/
+        //build headers
+        if (is_array($this->headerArray)) {
+            $xls .= $this->build($this->headerArray);
+        }
 
-	private function buildXLS() {
-	# build and return the xls 
-	
-		#Excel BOF
-		$xls = pack("ssssss", 0x809, 0x8, 0x0, 0x10, 0x0, 0x0);
+        //build body
+        if (is_array($this->bodyArray)) {
+            $xls .= $this->build($this->bodyArray);
+        }
 
-		#build headers
-		if(is_array($this->headerArray)) {
-			$xls .= $this->build($this->headerArray);
-		}
+        $xls .= pack('ss', 0x0A, 0x00);
 
-		#build body
-		if(is_array($this->bodyArray)) {
-			$xls .= $this->build($this->bodyArray);
-		}
+        return $xls;
+    }
 
-		$xls .= pack("ss", 0x0A, 0x00);
+    private function build($array)
+    {
+        //build and return the headers
 
-		return $xls;
-	}
+        foreach ($array as $key => $row) {
+            $colNo = 0;
+            foreach ($row as $key2 => $field) {
+                if (is_numeric($field)) {
+                    $build .= $this->numFormat($this->rowNo, $colNo, $field);
+                } else {
+                    $build .= $this->textFormat($this->rowNo, $colNo, $field);
+                }
 
-	private function build($array) {
-	#build and return the headers 
+                $colNo++;
+            }
+            $this->rowNo++;
+        }
 
-		foreach($array as $key=>$row) {
-			$colNo = 0;
-			foreach($row as $key2=>$field) {
-				if(is_numeric($field)) {
-					$build .= $this->numFormat($this->rowNo, $colNo, $field);
-				}
-				else
-				{
-					$build .= $this->textFormat($this->rowNo, $colNo, $field);
-				}
+        return $build;
+    }
 
-				$colNo++;
-			}
-			$this->rowNo++;
-		}
+    private function textFormat($row, $col, $data)
+    {
+        // format and return the field as a header
+        $data = utf8_decode($data);
+        $length = strlen($data);
+        $field = pack('ssssss', 0x204, 8 + $length, $row, $col, 0x0, $length);
+        $field .= $data;
 
-		return $build;
-	}
+        return $field;
+    }
 
-	private function textFormat($row, $col, $data) {
-	# format and return the field as a header
-		$data = utf8_decode($data);
-		$length = strlen($data);
-		$field = pack("ssssss", 0x204, 8 + $length, $row, $col, 0x0, $length);
-		$field .= $data;
+    private function numFormat($row, $col, $data)
+    {
+        // format and return the field as a header
+            $field = pack('sssss', 0x203, 14, $row, $col, 0x0);
+        $field .= pack('d', $data);
 
-		return $field; 
-	}
-		
-
-	private function numFormat($row, $col, $data) {
-	# format and return the field as a header
-    		$field = pack("sssss", 0x203, 14, $row, $col, 0x0);
-    		$field .= pack("d", $data); 
-		
-		return $field; 
-	}
+        return $field;
+    }
 }
-?>

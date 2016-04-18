@@ -10,7 +10,11 @@
 <link rel="" href="sortable/themes/blue/style.css" />
 <script>
 $(function(){
-	var job_no = <?  if(isset($_GET['job_no'])){echo ""+$_GET['job_no'];} else { echo "''";}; ?>;
+	var job_no = <?php  if (isset($_GET['job_no'])) {
+     echo '' + $_GET['job_no'];
+ } else {
+     echo "''";
+ } ?>;
 	if(job_no != "") {
 		var myjob = "" + job_no;
 		$(".job_no").html("" + job_no);

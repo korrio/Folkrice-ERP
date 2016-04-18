@@ -1,37 +1,33 @@
-<?
-	include_once('../_db.php');
-	include_once('_months.php');
+<?php
+    include_once '../_db.php';
+    include_once '_months.php';
 
+    if ($dbh === null) {
+        //Error
+    } else {
+        $categ = 'SELECT disTINCT l.categ_id,c.name FROM crm_lead l,crm_case_categ c where l.categ_id = c.id and l.categ_id is not null order by l.categ_id';
+        $r1 = retrieve($categ);
+        $acateg = [];
 
-
-	if ($dbh === null) {
-		//Error
-	} else {
-
-$categ = "SELECT disTINCT l.categ_id,c.name FROM crm_lead l,crm_case_categ c where l.categ_id = c.id and l.categ_id is not null order by l.categ_id";
-$r1 = retrieve($categ);
-$acateg = array();
-
-foreach($r1 as $v) {
-  $acateg[] = $v['name'];
-}
+        foreach ($r1 as $v) {
+            $acateg[] = $v['name'];
+        }
 /*
 for($i = count($r1) ; $i > 0 ; $i--) {
   $acateg[] = $r1[$i-1]['name'];
 }
 */
-		
-$jsonb = array();
-foreach($em as $k => $v) {	
-	$mnum = name_to_nmonth($mn,$v);
-	$num = days_in_month($mnum, $year);
-	$nn = name_to_n2($m2,$mnum);
 
-  $q3 = "";
+$jsonb = [];
+        foreach ($em as $k => $v) {
+            $mnum = name_to_nmonth($mn, $v);
+            $num = days_in_month($mnum, $year);
+            $nn = name_to_n2($m2, $mnum);
 
-  if($nn != "00") {
+            $q3 = '';
 
-    $q2 = "
+            if ($nn != '00') {
+                $q2 = "
       SELECT  a.categ_id, b.sum_rev,
           COALESCE(b.count, 0) AS Count
     FROM 
@@ -65,23 +61,21 @@ foreach($em as $k => $v) {
 
   ON a.categ_id = b.categ_id order by categ_id
       ";
-  		$result = retrieve($q2);
-  		$jsona = array();
-  		$values = array();
-  		$ev = array();
-  		foreach($result as $key => $val) {
-  			$ev[] = $val['sum_rev'];
-  		}
+                $result = retrieve($q2);
+                $jsona = [];
+                $values = [];
+                $ev = [];
+                foreach ($result as $key => $val) {
+                    $ev[] = $val['sum_rev'];
+                }
 
-  	$jsonb[] = array("label" => $v,"values" =>$ev);
-  }
-}
+                $jsonb[] = ['label' => $v, 'values' => $ev];
+            }
+        }
 
-$jsona[] = array("label" => $acateg,"values" => $jsonb);
+        $jsona[] = ['label' => $acateg, 'values' => $jsonb];
 
-
-
-$json = "{
+        $json = "{
       'label': ['done', 'open', 'pending', 'draft', 'cancel'],
       'values': [
       {
@@ -97,8 +91,5 @@ $json = "{
         'values': [38, 20, 35, 17]
       }]}";
 
-		echo $_GET['callback'].'('.json_encode($jsona,JSON_NUMERIC_CHECK).')';	
-		
-	}
-
-?>
+        echo $_GET['callback'].'('.json_encode($jsona, JSON_NUMERIC_CHECK).')';
+    }

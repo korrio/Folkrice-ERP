@@ -182,7 +182,7 @@ var p = "";
 		var p = $("[name='partner']").val();
 		call(j,s,st,h,p);
 	});
-	//var j = <? echo "'" . $_GET['job_no'] . "'"; ?>;
+	//var j = <?php echo "'".$_GET['job_no']."'"; ?>;
 	/* default call */
 
 	call_holders();
